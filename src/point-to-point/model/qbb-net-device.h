@@ -329,4 +329,3 @@ protected:
 } // namespace ns3
 
 #endif // QBB_NET_DEVICE_H
-
