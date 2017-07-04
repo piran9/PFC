@@ -382,7 +382,7 @@ int main(int argc, char *argv[])
 	}
 
 
-	bool dynamicth = use_dynamic_pfc_threshold;
+	bool dynamicth = use_dynamic_pfc_threshold;//mark1
 
 	NS_ASSERT(packet_level_ecmp + flow_level_ecmp < 2); //packet level ecmp and flow level ecmp are exclusive
 	Config::SetDefault("ns3::Ipv4GlobalRouting::RandomEcmpRouting", BooleanValue(packet_level_ecmp));
@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
 	tcpflowf >> tcp_flow_num;
 
 
-	NodeContainer n;
+	NodeContainer n;//topology edit
 	n.Create(node_num);
 	for (uint32_t i = 0; i < switch_num; i++)
 	{
@@ -496,6 +496,7 @@ int main(int argc, char *argv[])
 	}
 	AsciiTraceHelper ascii;
 	qbb.EnableAscii(ascii.CreateFileStream(trace_output_file), trace_nodes);
+	qbb.EnablePcap("pcapfile", trace_nodes,true);//added line-1
 
 	Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
@@ -565,7 +566,10 @@ int main(int argc, char *argv[])
 
 		ApplicationContainer sinkApp = sinkHelper.Install(n.Get(dst));
 		sinkApp.Start(Seconds(app_start_time));
+		//std::cout << app_start_time << std::endl;
 		sinkApp.Stop(Seconds(app_stop_time));
+		//sinkApp.Start(Seconds(start_time));
+		//sinkApp.Stop(Seconds(stop_time));
 
 		BulkSendHelper source("ns3::TcpSocketFactory", InetSocketAddress(serverAddress, port));
 		// Set the amount of data to send in bytes.  Zero is unlimited.

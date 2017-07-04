@@ -77,7 +77,8 @@ namespace ns3 {
 		void RemoveFromIngressAdmission(uint32_t port, uint32_t qIndex, uint32_t psize);
 		void RemoveFromEgressAdmission(uint32_t port, uint32_t qIndex, uint32_t psize);
 
-		void GetPauseClasses(uint32_t port, uint32_t qIndex, bool pClasses[]);
+		//void GetPauseClasses(uint32_t port, uint32_t qIndex, bool pClasses[]); //edited
+		void GetPauseClasses(uint32_t port, uint32_t qIndex, bool pClasses[],uint32_t pdClasses[]);
 		bool GetResumeClasses(uint32_t port, uint32_t qIndex);
 
 		void SetBroadcomParams(

@@ -239,7 +239,7 @@ namespace ns3 {
 	}
 
 	void
-		BroadcomNode::GetPauseClasses(uint32_t port, uint32_t qIndex, bool pClasses[])
+		BroadcomNode::GetPauseClasses(uint32_t port, uint32_t qIndex, bool pClasses[],uint32_t pdclasses[])
 	{
 		if (m_dynamicth)
 		{
@@ -287,6 +287,8 @@ namespace ns3 {
 		}
 		return;
 	}
+	//...........................................new edited.......................................................................//
+
 
 
 	bool
