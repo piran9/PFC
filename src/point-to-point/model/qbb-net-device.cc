@@ -572,15 +572,18 @@ namespace ns3 {
 			}
 			else // If this is a Pause, stop the corresponding queue
 			{
+				std::cout << m_qbbEnabled << std::endl;//edited
 				if (!m_qbbEnabled) return;
 				PauseHeader pauseh;
 				p->RemoveHeader(pauseh);
 				unsigned qIndex = pauseh.GetQIndex();
+				std::cout << sizeof(qIndex) << std::endl;  //edited
 				m_paused[qIndex] = true;
 				if (pauseh.GetTime() > 0)
 				{
 					Simulator::Cancel(m_resumeEvt[qIndex]);
-					m_resumeEvt[qIndex] = Simulator::Schedule(MicroSeconds(pauseh.GetTime()), &QbbNetDevice::PauseFinish, this, qIndex);
+					//m_resumeEvt[qIndex] = Simulator::Schedule(MicroSeconds(pauseh.GetTime()), &QbbNetDevice::PauseFinish, this, qIndex);          edited
+					m_resumeEvt[qIndex] = Simulator::Schedule(MicroSeconds(5), &QbbNetDevice::PauseFinish, this, qIndex);
 				}
 				else
 				{
@@ -958,15 +961,29 @@ namespace ns3 {
 		NS_LOG_FUNCTION(this);
 		Ptr<Ipv4> m_ipv4 = m_node->GetObject<Ipv4>();
 		bool pClasses[qCnt] = { 0 };
-		m_node->m_broadcom->GetPauseClasses(inDev, qIndex, pClasses);
+		uint32_t  pdClasses[qCnt] = { 1 };//1
+		m_node->m_broadcom->GetPauseClasses(inDev, qIndex, pClasses,pdClasses);//2
 		Ptr<NetDevice> device = m_ipv4->GetNetDevice(inDev);
 		for (uint32_t j = 0; j < qCnt; j++)
 		{
 			if (pClasses[j])			// Create the PAUSE packet
 			{
+				//std::cout << "sending a pause frame" << std::endl; //edit2
 				Ptr<Packet> p = Create<Packet>(0);
-				PauseHeader pauseh(m_pausetime, m_queue->GetNBytes(j), j);
-				p->AddHeader(pauseh);
+				if (pdClasses[j] == 1) {
+					PauseHeader pauseh(5, m_queue->GetNBytes(j), j);
+					p->AddHeader(pauseh);
+					std::cout << "pausetime is 80" << std::endl;
+				}
+				else {
+					PauseHeader pauseh(5, m_queue->GetNBytes(j), j);
+					p->AddHeader(pauseh);
+					std::cout << "pausetime is 255" << std::endl;
+				};
+				//PauseHeader pauseh(m_pausetime, m_queue->GetNBytes(j), j);.............original line
+				//std::cout << "sending a pause frame for"<<m_pausetime<< std::endl;
+
+				//p->AddHeader(pauseh);
 				Ipv4Header ipv4h;  // Prepare IPv4 header
 				ipv4h.SetProtocol(0xFE);
 				ipv4h.SetSource(m_node->GetObject<Ipv4>()->GetAddress(m_ifIndex, 0).GetLocal());
@@ -977,6 +994,7 @@ namespace ns3 {
 				p->AddHeader(ipv4h);
 				device->Send(p, Mac48Address("ff:ff:ff:ff:ff:ff"), 0x0800);
 				m_node->m_broadcom->m_pause_remote[inDev][qIndex] = true;
+
 				Simulator::Cancel(m_recheckEvt[inDev][qIndex]);
 				m_recheckEvt[inDev][qIndex] = Simulator::Schedule(MicroSeconds(m_pausetime / 2), &QbbNetDevice::CheckQueueFull, this, inDev, qIndex);
 			}
@@ -1486,4 +1504,3 @@ namespace ns3 {
 	}
 
 } // namespace ns3
-
